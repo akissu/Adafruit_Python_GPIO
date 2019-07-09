@@ -47,7 +47,10 @@ def _check_running_as_root():
     # NOTE: Checking for root with user ID 0 isn't very portable, perhaps
     # there's a better alternative?
     if os.geteuid() != 0:
-        raise RuntimeError('Expected to be run by root user! Try running with sudo.')
+        s = 'Not running as root. You will manually have to perform the following commands:\nmodprobe -r -q ftdi_sio\nmodprobe -r -q usbserial'
+        logger.info(s)
+    else:
+        raise RuntimeError('DO NOT RUN AS ROOT!')
 
 def disable_FTDI_driver():
     """Disable the FTDI drivers for the current platform.  This is necessary
@@ -65,8 +68,8 @@ def disable_FTDI_driver():
         logger.debug('Detected Linux')
         # Linux commands to disable FTDI driver.
         _check_running_as_root()
-        subprocess.call('modprobe -r -q ftdi_sio', shell=True)
-        subprocess.call('modprobe -r -q usbserial', shell=True)
+        #subprocess.call('modprobe -r -q ftdi_sio', shell=True)
+        #subprocess.call('modprobe -r -q usbserial', shell=True)
     # Note there is no need to disable FTDI drivers on Windows!
 
 def enable_FTDI_driver():
