@@ -43,11 +43,11 @@ LSBFIRST = 1
 _REPEAT_DELAY = 4
 
 
-def _check_running_as_root():
+def _check_running_as_root(s):
     # NOTE: Checking for root with user ID 0 isn't very portable, perhaps
     # there's a better alternative?
     if os.geteuid() != 0:
-        s = 'Not running as root. You will manually have to perform the following commands:\nmodprobe -r -q ftdi_sio\nmodprobe -r -q usbserial'
+        s = 'Not running as root. You will manually have to perform the following commands:\n' + s
         logger.info(s)
     else:
         raise RuntimeError('DO NOT RUN AS ROOT!')
@@ -61,15 +61,13 @@ def disable_FTDI_driver():
     if sys.platform == 'darwin':
         logger.debug('Detected Mac OSX')
         # Mac OS commands to disable FTDI driver.
-        _check_running_as_root()
-        subprocess.call('kextunload -b com.apple.driver.AppleUSBFTDI', shell=True)
-        subprocess.call('kextunload /System/Library/Extensions/FTDIUSBSerialDriver.kext', shell=True)
+        _check_running_as_root('kextunload -b com.apple.driver.AppleUSBFTDI')
+        _check_running_as_root('kextunload /System/Library/Extensions/FTDIUSBSerialDriver.kext')
     elif sys.platform.startswith('linux'):
         logger.debug('Detected Linux')
         # Linux commands to disable FTDI driver.
-        _check_running_as_root()
-        #subprocess.call('modprobe -r -q ftdi_sio', shell=True)
-        #subprocess.call('modprobe -r -q usbserial', shell=True)
+        _check_running_as_root('modprobe -r -q ftdi_sio')
+        _check_running_as_root('modprobe -r -q usbserial')
     # Note there is no need to disable FTDI drivers on Windows!
 
 def enable_FTDI_driver():
@@ -78,15 +76,13 @@ def enable_FTDI_driver():
     if sys.platform == 'darwin':
         logger.debug('Detected Mac OSX')
         # Mac OS commands to enable FTDI driver.
-        _check_running_as_root()
-        subprocess.check_call('kextload -b com.apple.driver.AppleUSBFTDI', shell=True)
-        subprocess.check_call('kextload /System/Library/Extensions/FTDIUSBSerialDriver.kext', shell=True)
+        _check_running_as_root('kextload -b com.apple.driver.AppleUSBFTDI')
+        _check_running_as_root('kextload /System/Library/Extensions/FTDIUSBSerialDriver.kext')
     elif sys.platform.startswith('linux'):
         logger.debug('Detected Linux')
         # Linux commands to enable FTDI driver.
-        _check_running_as_root()
-        subprocess.check_call('modprobe -q ftdi_sio', shell=True)
-        subprocess.check_call('modprobe -q usbserial', shell=True)
+        _check_running_as_root('modprobe -q ftdi_sio')
+        _check_running_as_root('modprobe -q usbserial')
 
 def use_FT232H():
     """Disable any built in FTDI drivers which will conflict and cause problems
